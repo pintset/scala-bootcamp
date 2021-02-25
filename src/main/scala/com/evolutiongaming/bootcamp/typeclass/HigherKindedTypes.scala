@@ -35,6 +35,7 @@ object HigherKindedTypes {
   but accept more arguments.
    */
   def curriedFunction1: (Long => Boolean) => String => Int = ???
+  def unCurriedFunction1(f: Long => Boolean, s: String): Int = ???
 
   /*
   Further in this "Higher Order Functions" block we assume that we are uncurrying all our functions so they
@@ -63,14 +64,15 @@ object HigherKindedTypes {
   def func2a(a: String, bar: Int => (Boolean => Long)): Long = ???
 
   // Exercise 2. What is order of the following function?
-  def funcX1(a: Int => String => Boolean): Long = ???
+  def funcX1(a: Int => String => Boolean): Long = ??? // 2
 
   // Exercise 3. What is order of the following function?
-  def funcX2(a: String): (Long => Boolean) => String = ???
+  def funcX2(a: String): (Long => Boolean) => String = ??? // 2
 
   /* Exercise 4. Write an example of Order 4 function:
   def func4(???): ??? = ???
    */
+  def func4(a: String): (((Int => Int) => Long) => Boolean) => String = ???
 
   /*
   Types as well as argument names in our signatures are not important to calculate order of function.
@@ -99,6 +101,8 @@ object HigherKindedTypes {
   // Exercise 5. What are the kinds of `funcX1` and `funcX2`?
   // def funcX1(a: Int => String => Boolean): Long = ???
   // def funcX2(a: String): (Long => Boolean) => String = ???
+  // funcX1: (* -> * -> *) -> *
+  // funcX2: * -> (* -> *) -> *
 
   /* 2. Higher Kinded Types
   Let's switch from functions to types. Types also can have parameters – other types. For example: `List`,
@@ -160,15 +164,15 @@ object HigherKindedTypes {
   ┌───────────────────────┬───────┐
   │         Type          │ Order │
   ├───────────────────────┼───────┤
-  │   Option[_]           │ ???   │
+  │   Option[_]           │ 1     │
   │                       │       │
-  │   Map[_, _]           │ ???   │
+  │   Map[_, _]           │ 1     │
   │                       │       │
   │   trait Maybe[T]      │       │
-  │   Maybe[_]            │ ???   │
+  │   Maybe[_]            │ 1     │
   │                       │       │
   │   trait Functor[F[_]] │       │
-  │   Functor[_[_]]       │ ???   │
+  │   Functor[_[_]]       │ 2     │
   └───────────────────────┴───────┘
    */
 
@@ -177,13 +181,13 @@ object HigherKindedTypes {
   ┌─────────────────────┬──────────────────┐
   │        Type         │       Kind       │
   ├─────────────────────┼──────────────────┤
-  │ String              │ ???              │
-  │ Option[_]           │ ???              │
-  │ List[_]             │ ???              │
-  │ Functor[_[_]]       │ ???              │
-  │ Set[_]              │ ???              │
-  │ Map[_, _]           │ ???              │
-  │ Kleisli[_[_], _, _] │ ???              │
+  │ String              │ *                │
+  │ Option[_]           │ * -> *           │
+  │ List[_]             │ * -> *           │
+  │ Functor[_[_]]       │ (* -> *) -> *    │
+  │ Set[_]              │ * -> *           │
+  │ Map[_, _]           │ * -> * -> *      │
+  │ Kleisli[_[_], _, _] │ (* -> *) -> * -> * -> * │
   └─────────────────────┴──────────────────┘
    */
 
@@ -215,9 +219,10 @@ object HigherKindedTypes {
   // `Maybe` is defined for any type `A` as we don't use any specifics of A. We abstract over this type.
 
   // Exercise 8. Implement `Disjunction` – your own version of `Either`
-  sealed trait Disjunction[???]
+  sealed trait Disjunction[+L, +R]
   object Disjunction {
-    // ???
+    case class Left[+L, +R](left: L) extends Disjunction[L, R]
+    case class Right[+L, +R](right: R) extends Disjunction[L, R]
   }
 
   /*
